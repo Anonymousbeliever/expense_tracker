@@ -1,5 +1,4 @@
 import 'dart:math';
-
 import 'package:expense_tracker/screens/home/views/main_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,7 @@ class HomeScreen extends StatelessWidget {
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         child: BottomNavigationBar(
-          backgroundColor: Colors.white,
+          backgroundColor: Colors.grey.shade200,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           elevation: 3,
