@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:expense_tracker/data/data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -231,7 +232,7 @@ class MainScreen extends StatelessWidget {
             SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
-                itemCount: 3,
+                itemCount: transactionsData.length,
                 itemBuilder: (context, int i) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 8.0),
@@ -243,30 +244,42 @@ class MainScreen extends StatelessWidget {
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.yellow,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                            SizedBox(width: 12),
-                            Text(
-                              "Shopping",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onBackground,
-                              ),
+                            Row(
+                              children: [
+                                Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        color: transactionsData[i]['color'],
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                    Icon(transactionsData[i]['icon'], color: Colors.white),
+                                  ],
+                                ),
+                                SizedBox(width: 12),
+                                Text(
+                                  transactionsData[i]['name'],
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onBackground,
+                                  ),
+                                ),
+                              ],
                             ),
                             Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  "- KSH 1,200.00",
+                                  transactionsData[i]['amount'],
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
@@ -276,7 +289,7 @@ class MainScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Text(
-                                  "Today",
+                                  transactionsData[i]['date'],
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w400,
