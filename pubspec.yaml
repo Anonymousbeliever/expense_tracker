@@ -28,7 +28,7 @@ dependencies:
   uuid: ^4.5.1
 
   # Charts & Insights
-  fl_chart: ^0.66.2   # ✅ downgraded to supported version
+  fl_chart: ^1.1.0   # ✅ downgraded to supported version
 
   # Local storage (optional, for caching)
   shared_preferences: ^2.3.3
