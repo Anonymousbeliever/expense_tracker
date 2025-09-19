@@ -1,9 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class AddExpense extends StatelessWidget {
+class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
 
+  @override
+  State<AddExpense> createState() => _AddExpenseState();
+}
+
+class _AddExpenseState extends State<AddExpense> {
+  TextEditingController amountController = TextEditingController();
+  TextEditingController categoryController = TextEditingController();
+  TextEditingController dateController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -28,6 +36,8 @@ class AddExpense extends StatelessWidget {
               SizedBox(
                 width: MediaQuery.of(context).size.width * 0.8,
                 child: TextFormField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: Colors.grey.shade300,
@@ -35,7 +45,7 @@ class AddExpense extends StatelessWidget {
                       CupertinoIcons.money_dollar,
                       color: Colors.grey.shade500,
                     ),
-                    hintText: "Amount",
+                    hintText: "Amount in KSH",
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -43,8 +53,9 @@ class AddExpense extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 32),
               TextFormField(
+                controller: categoryController,
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade300,
@@ -61,15 +72,17 @@ class AddExpense extends StatelessWidget {
               ),
               SizedBox(height: 16),
               TextFormField(
+                controller: dateController,
                 readOnly: true,
-                onTap: () => showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2100),
-                ).then((selectedDate) {
-                  // Handle the selected date here
-                }),
+                onTap: () =>
+                    showDatePicker(
+                      context: context,
+                      initialDate: DateTime.now(),
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime(2100),
+                    ).then((selectedDate) {
+                      // Handle the selected date here
+                    }),
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade300,
@@ -84,8 +97,21 @@ class AddExpense extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-              ElevatedButton(onPressed: () {}, child: Text("Add Expense")),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: Text(
+                  "Add Expense",
+                ),
+              ),
             ],
           ),
         ),
