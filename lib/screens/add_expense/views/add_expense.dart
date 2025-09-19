@@ -22,7 +22,9 @@ class AddExpense extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            TextFormField()
+            TextFormField(),
+            TextFormField(),
+            TextFormField(),
           ],
         ),
       ),
