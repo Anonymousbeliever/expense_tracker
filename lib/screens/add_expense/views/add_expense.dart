@@ -12,6 +12,14 @@ class _AddExpenseState extends State<AddExpense> {
   TextEditingController amountController = TextEditingController();
   TextEditingController categoryController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+
+  @override
+  void initState() {
+    dateController.text = DateTime.now().toString().split(' ')[0];
+    super.initState();
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -74,15 +82,18 @@ class _AddExpenseState extends State<AddExpense> {
               TextFormField(
                 controller: dateController,
                 readOnly: true,
-                onTap: () =>
-                    showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
-                    ).then((selectedDate) {
-                      // Handle the selected date here
-                    }),
+                onTap: () async {
+                  DateTime? selectedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime(2100),
+                  );
+                  if (selectedDate != null) {
+                    dateController.text =
+                        selectedDate.toString().split(' ')[0];
+                  }
+                },
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.grey.shade300,
