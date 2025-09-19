@@ -1,5 +1,4 @@
 import 'package:expense_tracker/screens/stats/chart.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class StatScreen extends StatelessWidget {
@@ -18,7 +17,6 @@ class StatScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              
               ),
             ),
           const  SizedBox(height: 20),
