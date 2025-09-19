@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:expense_tracker/screens/add_expense/views/add_expense.dart';
 import 'package:expense_tracker/screens/home/views/main_screen.dart';
 import 'package:expense_tracker/screens/stats/stats.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,7 +16,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int currentIndex = 0;
   late Color selectedItem = Colors.blue;
   Color unselectedItem = Colors.grey;
-
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +54,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddExpense()),
+          );
+        },
         shape: const CircleBorder(),
         child: Container(
           width: 60,
