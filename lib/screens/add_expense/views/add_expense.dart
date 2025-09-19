@@ -12,6 +12,7 @@ class _AddExpenseState extends State<AddExpense> {
   TextEditingController amountController = TextEditingController();
   TextEditingController categoryController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  DateTime selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -83,15 +84,15 @@ class _AddExpenseState extends State<AddExpense> {
                 controller: dateController,
                 readOnly: true,
                 onTap: () async {
-                  DateTime? selectedDate = await showDatePicker(
+                  DateTime? newDate = await showDatePicker(
                     context: context,
-                    initialDate: DateTime.now(),
+                    initialDate: selectedDate,
                     firstDate: DateTime(2000),
                     lastDate: DateTime(2100),
                   );
-                  if (selectedDate != null) {
+                  if (newDate != null) {
                     dateController.text =
-                        selectedDate.toString().split(' ')[0];
+                        newDate.toString().split(' ')[0];
                   }
                 },
                 decoration: InputDecoration(
