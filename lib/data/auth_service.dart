@@ -3,13 +3,26 @@ import 'package:flutter/foundation.dart';
 class User {
   final String uid;
   final String email;
-  final String? displayName;
+  String? displayName;
 
   User({
     required this.uid,
     required this.email,
     this.displayName,
   });
+
+  // Create a copy with updated fields
+  User copyWith({
+    String? uid,
+    String? email,
+    String? displayName,
+  }) {
+    return User(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      displayName: displayName ?? this.displayName,
+    );
+  }
 }
 
 class AuthException implements Exception {
@@ -114,6 +127,23 @@ class AuthService extends ChangeNotifier {
     _setLoading(false);
     // In a real app, this would send an actual email
     // For now, we'll just simulate success
+  }
+
+  Future<void> updateDisplayName(String displayName) async {
+    if (_currentUser == null) {
+      throw AuthException('No user is currently signed in.');
+    }
+
+    _setLoading(true);
+    
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Update the current user's display name
+    _currentUser = _currentUser!.copyWith(displayName: displayName.trim());
+    
+    _setLoading(false);
+    notifyListeners();
   }
 
   Future<void> signOut() async {

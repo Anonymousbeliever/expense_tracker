@@ -3,6 +3,8 @@ import 'dart:math';
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
+import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
+import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +74,16 @@ class MainScreen extends StatelessWidget {
                     } else if (value == 'theme') {
                       final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
                       themeProvider.setDarkTheme(!themeProvider.getIsDarkTheme);
+                    } else if (value == 'profile') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ProfileScreen()),
+                      );
+                    } else if (value == 'settings') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                      );
                     }
                   },
                   icon: Icon(CupertinoIcons.settings),
