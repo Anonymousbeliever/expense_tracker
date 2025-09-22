@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/data/auth_service.dart';
+import 'package:expense_tracker/data/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -67,6 +69,9 @@ class MainScreen extends StatelessWidget {
                   onSelected: (value) async {
                     if (value == 'logout') {
                       await AuthService().signOut();
+                    } else if (value == 'theme') {
+                      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+                      themeProvider.setDarkTheme(!themeProvider.getIsDarkTheme);
                     }
                   },
                   icon: Icon(CupertinoIcons.settings),
@@ -79,6 +84,29 @@ class MainScreen extends StatelessWidget {
                           SizedBox(width: 8),
                           Text('Profile'),
                         ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'theme',
+                      child: Consumer<ThemeProvider>(
+                        builder: (context, themeProvider, child) {
+                          return Row(
+                            children: [
+                              Icon(
+                                themeProvider.getIsDarkTheme 
+                                    ? CupertinoIcons.sun_max 
+                                    : CupertinoIcons.moon, 
+                                size: 16
+                              ),
+                              SizedBox(width: 8),
+                              Text(
+                                themeProvider.getIsDarkTheme 
+                                    ? 'Light Mode' 
+                                    : 'Dark Mode'
+                              ),
+                            ],
+                          );
+                        },
                       ),
                     ),
                     PopupMenuItem<String>(

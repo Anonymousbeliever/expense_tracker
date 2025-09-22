@@ -19,6 +19,7 @@ class StatScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onBackground,
                 ),
               ),
             const  SizedBox(height: 20),
@@ -26,8 +27,12 @@ class StatScreen extends StatelessWidget {
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(20)
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    width: 1,
+                  ),
                 ),
                 // color: Colors.red,
                 child: Padding(

@@ -160,9 +160,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.blue[50],
+                            color: Theme.of(context).colorScheme.primaryContainer,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.blue[200]!),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                            ),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 'Demo Credentials:',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.blue[800],
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -179,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 'Email: test@example.com\nPassword: password123',
                                 style: TextStyle(
                                   fontFamily: 'monospace',
-                                  color: Colors.blue[700],
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
                                 ),
                               ),
                             ],

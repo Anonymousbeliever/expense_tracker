@@ -130,9 +130,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.orange[50],
+                color: Theme.of(context).colorScheme.tertiaryContainer,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +143,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     children: [
                       Icon(
                         Icons.info_outline,
-                        color: Colors.orange[700],
+                        color: Theme.of(context).colorScheme.onTertiaryContainer,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
@@ -149,7 +151,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         'Demo Mode',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.orange[800],
+                          color: Theme.of(context).colorScheme.onTertiaryContainer,
                         ),
                       ),
                     ],
@@ -158,7 +160,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   Text(
                     'In demo mode, password reset emails are simulated. Use the demo credentials to test the app.',
                     style: TextStyle(
-                      color: Colors.orange[700],
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
                       fontSize: 12,
                     ),
                   ),
