@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:expense_tracker/data/data.dart';
+import 'package:expense_tracker/data/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,10 +10,15 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
-        child: Column(
+    final authService = AuthService();
+    final currentUser = authService.currentUser;
+    
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
+          child: Column(
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -46,7 +52,7 @@ class MainScreen extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          "James Charo",
+                          currentUser?.displayName ?? "User",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -57,9 +63,45 @@ class MainScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                IconButton(
-                  onPressed: () {},
+                PopupMenuButton<String>(
+                  onSelected: (value) async {
+                    if (value == 'logout') {
+                      await AuthService().signOut();
+                    }
+                  },
                   icon: Icon(CupertinoIcons.settings),
+                  itemBuilder: (BuildContext context) => [
+                    PopupMenuItem<String>(
+                      value: 'profile',
+                      child: Row(
+                        children: [
+                          Icon(CupertinoIcons.person, size: 16),
+                          SizedBox(width: 8),
+                          Text('Profile'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'settings',
+                      child: Row(
+                        children: [
+                          Icon(CupertinoIcons.settings, size: 16),
+                          SizedBox(width: 8),
+                          Text('Settings'),
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem<String>(
+                      value: 'logout',
+                      child: Row(
+                        children: [
+                          Icon(CupertinoIcons.square_arrow_right, size: 16),
+                          SizedBox(width: 8),
+                          Text('Logout'),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -309,8 +351,10 @@ class MainScreen extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
+        ), // Column
+      ), // Padding
+    ), // SafeArea
+  ); // Scaffold
 }
+  }
+

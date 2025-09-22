@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'screens/home/views/home_screen.dart';
-
+import 'package:expense_tracker/screens/auth/views/auth_wrapper.dart';
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});
@@ -22,7 +20,7 @@ class MyAppView extends StatelessWidget {
         ),
        
       ),
-      home: const HomeScreen(),
+      home: const AuthWrapper(),
     );
   }
 }
