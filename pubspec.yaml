@@ -41,8 +41,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   # Uncomment when you add images or icons
-  # assets:
-  #   - assets/images/
+  assets:
+    - assets/
 
 dependency_overrides:
   web: ^1.0.0

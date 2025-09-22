@@ -20,7 +20,6 @@ class _AddExpenseState extends State<AddExpense> {
     super.initState();
   }
 
-  
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -64,6 +63,10 @@ class _AddExpenseState extends State<AddExpense> {
               ),
               SizedBox(height: 32),
               TextFormField(
+                readOnly: true,
+                onTap: () {
+                  // Show category selection modal or dropdown
+                },
                 controller: categoryController,
                 decoration: InputDecoration(
                   filled: true,
@@ -71,6 +74,63 @@ class _AddExpenseState extends State<AddExpense> {
                   prefixIcon: Icon(
                     CupertinoIcons.list_bullet,
                     color: Colors.grey.shade500,
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (ctx) {
+                          return AlertDialog(
+                            title: Text("Add New Category"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(height: 16),
+                                TextFormField(
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.grey.shade300,
+                                    hintText: "Name",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                TextFormField(
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.grey.shade300,
+                                    hintText: "Icon",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 16),
+                                TextFormField(
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: Colors.grey.shade300,
+                                    hintText: "Color",
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    icon: Icon(
+                      CupertinoIcons.plus,
+                      color: Colors.grey.shade500,
+                    ),
                   ),
                   hintText: "Category",
                   border: OutlineInputBorder(
@@ -91,8 +151,7 @@ class _AddExpenseState extends State<AddExpense> {
                     lastDate: DateTime(2100),
                   );
                   if (newDate != null) {
-                    dateController.text =
-                        newDate.toString().split(' ')[0];
+                    dateController.text = newDate.toString().split(' ')[0];
                   }
                 },
                 decoration: InputDecoration(
@@ -120,9 +179,7 @@ class _AddExpenseState extends State<AddExpense> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: Text(
-                  "Add Expense",
-                ),
+                child: Text("Add Expense"),
               ),
             ],
           ),
