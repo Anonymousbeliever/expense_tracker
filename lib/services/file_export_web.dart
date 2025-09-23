@@ -1,5 +1,6 @@
 // Web-specific implementation for file export
-import 'dart:html' as html;
+import 'dart:html' as html show Blob, Url, AnchorElement;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/data.dart';
@@ -10,6 +11,11 @@ class WebFileExportService {
     required List<Expense> expenses,
     required String timeFilter,
   }) async {
+    if (!kIsWeb) {
+      _showSnackBar(context, 'Web export not available on this platform.', Colors.orange);
+      return;
+    }
+    
     try {
       if (expenses.isEmpty) {
         _showSnackBar(context, 'No transactions to export.', Colors.orange);

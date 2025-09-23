@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/models/user.dart';
 import 'package:expense_tracker/screens/home/home.dart';
@@ -9,43 +10,58 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: AuthService().authStateChanges,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            body: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.account_balance_wallet,
-                    size: 80,
-                    color: Theme.of(context).colorScheme.primary,
+    return Consumer<AuthService>(
+      builder: (context, authService, child) {
+        return StreamBuilder<User?>(
+          stream: authService.authStateChanges,
+          builder: (context, snapshot) {
+            // Handle stream errors
+            if (snapshot.hasError) {
+              debugPrint('Auth stream error: ${snapshot.error}');
+              return const LoginScreen();
+            }
+            
+            if (snapshot.connectionState == ConnectionState.waiting || authService.isLoading) {
+              return Scaffold(
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 80,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        'Expense Tracker',
+                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Loading...',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Expense Tracker',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  CircularProgressIndicator(
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-        
-        if (snapshot.hasData && snapshot.data != null) {
-          return const HomeScreen();
-        }
-        
-        return const LoginScreen();
+                ),
+              );
+            }
+            
+            if (snapshot.hasData && snapshot.data != null) {
+              return const HomeScreen();
+            }
+            
+            return const LoginScreen();
+          },
+        );
       },
     );
   }

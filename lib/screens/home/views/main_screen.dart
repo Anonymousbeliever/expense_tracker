@@ -147,7 +147,7 @@ class MainScreen extends StatelessWidget {
               ),
               SizedBox(height: 10),
               CreditCard(
-                currentBalance: 5194.00 - totalExpenses,
+                currentBalance: 50000.00 - totalExpenses,
                 monthlyBudget: 5194.00,
                 totalSpent: totalExpenses,
                 isActive: true,

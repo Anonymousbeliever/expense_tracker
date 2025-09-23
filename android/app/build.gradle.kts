@@ -1,8 +1,5 @@
 plugins {
     id("com.android.application")
-    // START: FlutterFire Configuration
-    id("com.google.gms.google-services")
-    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -11,9 +8,6 @@ plugins {
 android {
     namespace = "com.example.expense_tracker"
     compileSdk = flutter.compileSdkVersion
-
-    // 👇 Force the NDK version required by Firebase & other plugins
-    ndkVersion = "27.0.12077973"
 
     compileOptions {
         // Java 11 compatibility

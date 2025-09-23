@@ -76,7 +76,7 @@ class CreditCard extends StatelessWidget {
                 "KSH ${NumberFormat('#,##0.00').format(currentBalance)}",
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 32,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
                 ),

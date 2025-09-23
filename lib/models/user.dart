@@ -27,15 +27,49 @@ class User {
   }
 
   factory User.fromMap(Map<String, dynamic> map) {
+    // Handle different createdAt formats (Timestamp vs milliseconds)
+    DateTime createdAt;
+    if (map['createdAt'] is int) {
+      createdAt = DateTime.fromMillisecondsSinceEpoch(map['createdAt']);
+    } else if (map['createdAt'] != null) {
+      // Handle Firestore Timestamp by calling toDate() method
+      try {
+        final timestamp = map['createdAt'];
+        // Check if it has a toDate method (Firestore Timestamp)
+        if (timestamp.runtimeType.toString().contains('Timestamp')) {
+          createdAt = timestamp.toDate();
+        } else {
+          createdAt = DateTime.now(); // fallback
+        }
+      } catch (e) {
+        createdAt = DateTime.now(); // fallback
+      }
+    } else {
+      createdAt = DateTime.now(); // fallback
+    }
+
+    // Handle lastLoginAt similarly
+    DateTime? lastLoginAt;
+    if (map['lastLoginAt'] is int) {
+      lastLoginAt = DateTime.fromMillisecondsSinceEpoch(map['lastLoginAt']);
+    } else if (map['lastLoginAt'] != null) {
+      try {
+        final timestamp = map['lastLoginAt'];
+        if (timestamp.runtimeType.toString().contains('Timestamp')) {
+          lastLoginAt = timestamp.toDate();
+        }
+      } catch (e) {
+        lastLoginAt = null;
+      }
+    }
+
     return User(
       id: map['id'] ?? '',
       email: map['email'] ?? '',
-      displayName: map['displayName'],
+      displayName: map['displayName'] ?? map['name'], // Handle both 'displayName' and 'name'
       photoUrl: map['photoUrl'],
-      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAt'] ?? 0),
-      lastLoginAt: map['lastLoginAt'] != null
-          ? DateTime.fromMillisecondsSinceEpoch(map['lastLoginAt'])
-          : null,
+      createdAt: createdAt,
+      lastLoginAt: lastLoginAt,
     );
   }
 

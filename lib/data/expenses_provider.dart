@@ -1,32 +1,123 @@
 import 'package:flutter/foundation.dart';
 import '../models/expense.dart';
+import '../repositories/repositories.dart';
+import 'auth_service.dart';
 
-/// Expenses Provider for state management
+/// Expenses Provider for state management with local storage
 /// Manages the list of expenses and provides CRUD operations
 class ExpensesProvider with ChangeNotifier {
-  final List<Expense> _expenses = [];
+  final AuthService _authService = AuthService();
+  LocalExpenseRepository? _repository;
+  List<Expense> _expenses = [];
+  bool _isLoading = false;
+  String? _error;
 
-  /// Get a read-only list of all expenses
+  /// Constructor
+  ExpensesProvider() {
+    _authService.addListener(_onAuthStateChanged);
+    _onAuthStateChanged();
+  }
+
+  /// Getters
   List<Expense> get expenses => List.unmodifiable(_expenses);
+  bool get isLoading => _isLoading;
+  String? get error => _error;
 
-  /// Add a new expense to the list
-  void addExpense(Expense expense) {
-    _expenses.add(expense);
-    notifyListeners();
+  /// Handle auth state changes
+  void _onAuthStateChanged() {
+    final user = _authService.currentUser;
+    if (user != null) {
+      _repository = LocalExpenseRepository();
+      loadExpenses();
+    } else {
+      _repository = null;
+      _expenses.clear();
+      notifyListeners();
+    }
+  }
+
+  /// Load expenses from Firebase
+  Future<void> loadExpenses() async {
+    if (_repository == null) return;
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      _expenses = await _repository!.getAllExpenses();
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to load expenses: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Add a new expense
+  Future<void> addExpense(Expense expense) async {
+    if (_repository == null) {
+      _setError('User must be signed in to add expenses');
+      return;
+    }
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _repository!.addExpense(expense);
+      _expenses.add(expense);
+      _expenses.sort((a, b) => b.date.compareTo(a.date)); // Sort by date desc
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to add expense: $e');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Remove an expense by ID
-  void removeExpense(String id) {
-    _expenses.removeWhere((expense) => expense.id == id);
-    notifyListeners();
+  Future<void> removeExpense(String id) async {
+    if (_repository == null) {
+      _setError('User must be signed in to remove expenses');
+      return;
+    }
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _repository!.deleteExpense(id);
+      _expenses.removeWhere((expense) => expense.id == id);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to remove expense: $e');
+    } finally {
+      _setLoading(false);
+    }
   }
 
   /// Update an existing expense
-  void updateExpense(String id, Expense updatedExpense) {
-    final index = _expenses.indexWhere((expense) => expense.id == id);
-    if (index != -1) {
-      _expenses[index] = updatedExpense;
-      notifyListeners();
+  Future<void> updateExpense(String id, Expense updatedExpense) async {
+    if (_repository == null) {
+      _setError('User must be signed in to update expenses');
+      return;
+    }
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      await _repository!.updateExpense(updatedExpense);
+      final index = _expenses.indexWhere((expense) => expense.id == id);
+      if (index != -1) {
+        _expenses[index] = updatedExpense;
+        _expenses.sort((a, b) => b.date.compareTo(a.date)); // Re-sort
+        notifyListeners();
+      }
+    } catch (e) {
+      _setError('Failed to update expense: $e');
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -55,8 +146,65 @@ class ExpensesProvider with ChangeNotifier {
     return sortedExpenses.take(count).toList();
   }
 
-  /// Clear all expenses
-  void clearAllExpenses() {
+  /// Get expenses for current month
+  List<Expense> get currentMonthExpenses {
+    final now = DateTime.now();
+    final startOfMonth = DateTime(now.year, now.month, 1);
+    final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+    return getExpensesByDateRange(startOfMonth, endOfMonth);
+  }
+
+  /// Get total spent this month
+  double get monthlyTotal {
+    return currentMonthExpenses.fold(0.0, (sum, expense) => sum + expense.amount);
+  }
+
+  /// Get category totals for this month
+  Map<String, double> get monthlyCategoryTotals {
+    final monthlyExpenses = currentMonthExpenses;
+    final Map<String, double> categoryTotals = {};
+    
+    for (final expense in monthlyExpenses) {
+      categoryTotals[expense.category] = 
+          (categoryTotals[expense.category] ?? 0) + expense.amount;
+    }
+    
+    return categoryTotals;
+  }
+
+  /// Get expenses summary
+  Future<Map<String, dynamic>> getExpensesSummary() async {
+    if (_repository == null) return {};
+    
+    try {
+      final allExpenses = await _repository!.getAllExpenses();
+      double total = 0;
+      Map<String, double> categoryTotals = {};
+      
+      for (var expense in allExpenses) {
+        total += expense.amount;
+        categoryTotals[expense.category] = 
+            (categoryTotals[expense.category] ?? 0) + expense.amount;
+      }
+      
+      return {
+        'total': total,
+        'count': allExpenses.length,
+        'categories': categoryTotals,
+      };
+    } catch (e) {
+      _setError('Failed to get expenses summary: $e');
+      return {};
+    }
+  }
+
+  /// Refresh expenses from repository
+  Future<void> refreshExpenses() async {
+    await loadExpenses();
+  }
+
+  /// Clear all local expenses (doesn't affect Firebase)
+  void clearLocalExpenses() {
     _expenses.clear();
     notifyListeners();
   }
@@ -69,4 +217,25 @@ class ExpensesProvider with ChangeNotifier {
 
   /// Check if expenses list is not empty
   bool get isNotEmpty => _expenses.isNotEmpty;
+
+  /// Private helper methods
+  void _setLoading(bool loading) {
+    _isLoading = loading;
+    notifyListeners();
+  }
+
+  void _setError(String error) {
+    _error = error;
+    notifyListeners();
+  }
+
+  void _clearError() {
+    _error = null;
+  }
+
+  @override
+  void dispose() {
+    _authService.removeListener(_onAuthStateChanged);
+    super.dispose();
+  }
 }
