@@ -4,9 +4,11 @@ import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
 import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
 import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
+import 'package:expense_tracker/screens/stats/stats.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -16,8 +18,13 @@ class MainScreen extends StatelessWidget {
     final authService = AuthService();
     final currentUser = authService.currentUser;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+    return Consumer<ExpensesProvider>(
+      builder: (context, expensesProvider, child) {
+        final totalExpenses = expensesProvider.totalExpenses;
+        final recentExpenses = expensesProvider.expenses.take(5).toList();
+        
+        return Scaffold(
+          backgroundColor: Theme.of(context).colorScheme.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 25.0, vertical: 10.0),
@@ -178,7 +185,7 @@ class MainScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      "KSH 5,194.00",
+                      "KSH ${NumberFormat('#,##0.00').format(5194.00 - totalExpenses)}",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 32,
@@ -261,7 +268,7 @@ class MainScreen extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    "KSH 500.00",
+                                    "KSH ${NumberFormat('#,##0.00').format(totalExpenses)}",
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -291,7 +298,12 @@ class MainScreen extends StatelessWidget {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const StatScreen()),
+                      );
+                    },
                     child: Text(
                       'View all',
                       style: TextStyle(
@@ -305,75 +317,95 @@ class MainScreen extends StatelessWidget {
               ),
               SizedBox(height: 20),
               Expanded(
-                child: ListView.builder(
-                  itemCount: transactionsData.length,
-                  itemBuilder: (context, int i) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Card(
-                        color: Theme.of(context).colorScheme.surface,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: transactionsData[i]['color']?.withOpacity(0.2) ?? Theme.of(context).colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(8),
+                child: recentExpenses.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              CupertinoIcons.money_dollar_circle,
+                              size: 64,
+                              color: Theme.of(context).colorScheme.outline,
                             ),
-                            child: Icon(
-                              transactionsData[i]['icon'] ?? CupertinoIcons.question,
-                              color: transactionsData[i]['color'] ?? Theme.of(context).colorScheme.onPrimaryContainer,
-                            ),
-                          ),
-                          title: Text(
-                            transactionsData[i]['name'] ?? 'Unknown',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          subtitle: Text(
-                            transactionsData[i]['date'] ?? 'No date',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                transactionsData[i]['amount'] ?? 'KSH 0.00',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: transactionsData[i]['amount'].toString().contains('-')
-                                      ? Colors.red
-                                      : Theme.of(context).colorScheme.onSurface,
-                                ),
-                              ),
-                              Icon(
-                                CupertinoIcons.chevron_right,
-                                size: 16,
+                            const SizedBox(height: 16),
+                            Text(
+                              'No expenses yet',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Start tracking your expenses!',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
                         ),
+                      )
+                    : ListView.builder(
+                        itemCount: recentExpenses.length,
+                        itemBuilder: (context, int i) {
+                          final expense = recentExpenses[i];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Card(
+                              color: Theme.of(context).colorScheme.surface,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: expense.color.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Icon(
+                                    expense.icon,
+                                    color: expense.color,
+                                  ),
+                                ),
+                                title: Text(
+                                  expense.category,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  DateFormat('MMM dd, yyyy').format(expense.date),
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                trailing: Text(
+                                  '- KSH ${NumberFormat('#,##0.00').format(expense.amount)}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
         ),
       ),
+    );
+      },
     );
   }
 }
