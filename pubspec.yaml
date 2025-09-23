@@ -33,6 +33,10 @@ dependencies:
   # Local storage (optional, for caching)
   shared_preferences: ^2.3.3
 
+  # File operations
+  path_provider: ^2.1.4
+  permission_handler: ^11.3.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

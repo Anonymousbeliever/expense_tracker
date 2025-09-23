@@ -1,4 +1,5 @@
 import 'package:expense_tracker/screens/stats/chart.dart';
+import 'package:expense_tracker/services/file_export_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/data.dart';
@@ -13,6 +14,21 @@ class StatScreen extends StatefulWidget {
 class _StatScreenState extends State<StatScreen> {
   String _selectedFilter = '7 Days';
 
+  Future<void> _downloadReport(ExpensesProvider provider) async {
+    final now = DateTime.now();
+    final days = _selectedFilter == '7 Days' ? 7 : 30;
+    final startDate = now.subtract(Duration(days: days - 1));
+    final filteredExpenses = provider.expenses
+        .where((e) => e.date.isAfter(startDate.subtract(const Duration(days: 1))))
+        .toList();
+
+    await FileExportService.exportTransactionsToCSV(
+      context: context,
+      expenses: filteredExpenses,
+      timeFilter: _selectedFilter,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,6 +38,17 @@ class _StatScreenState extends State<StatScreen> {
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
+        actions: [
+          Consumer<ExpensesProvider>(
+            builder: (context, provider, child) {
+              return IconButton(
+                icon: const Icon(Icons.download),
+                onPressed: () => _downloadReport(provider),
+                tooltip: 'Download Report',
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -103,8 +130,21 @@ class _StatScreenState extends State<StatScreen> {
                   ),
                   const SizedBox(height: 24),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      ElevatedButton.icon(
+                        onPressed: () => _downloadReport(provider),
+                        icon: const Icon(Icons.download, size: 16),
+                        label: const Text('Export Report'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                      ),
                       DropdownButton<String>(
                         value: _selectedFilter,
                         items: ['7 Days', '30 Days'].map((filter) {
