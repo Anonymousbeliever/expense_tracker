@@ -4,7 +4,7 @@ import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
 import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
 import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
-import 'package:expense_tracker/screens/stats/stats.dart';
+import 'package:expense_tracker/screens/transactions/transactions.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -301,7 +301,7 @@ class MainScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const StatScreen()),
+                        MaterialPageRoute(builder: (context) => const AllTransactionsScreen()),
                       );
                     },
                     child: Text(
