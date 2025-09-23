@@ -1,6 +1,4 @@
 import 'package:expense_tracker/data/data.dart';
-import 'package:expense_tracker/data/auth_service.dart';
-import 'package:expense_tracker/data/theme_provider.dart';
 import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
 import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
 import 'package:expense_tracker/screens/transactions/transactions.dart';

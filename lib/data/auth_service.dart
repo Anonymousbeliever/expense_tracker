@@ -1,29 +1,5 @@
 import 'package:flutter/foundation.dart';
-
-class User {
-  final String uid;
-  final String email;
-  String? displayName;
-
-  User({
-    required this.uid,
-    required this.email,
-    this.displayName,
-  });
-
-  // Create a copy with updated fields
-  User copyWith({
-    String? uid,
-    String? email,
-    String? displayName,
-  }) {
-    return User(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      displayName: displayName ?? this.displayName,
-    );
-  }
-}
+import '../models/user.dart';
 
 class AuthException implements Exception {
   final String message;
@@ -75,9 +51,11 @@ class AuthService extends ChangeNotifier {
     }
 
     _currentUser = User(
-      uid: email.hashCode.toString(),
+      id: email.hashCode.toString(),
       email: email,
       displayName: email.split('@')[0],
+      createdAt: DateTime.now(),
+      lastLoginAt: DateTime.now(),
     );
 
     _setLoading(false);
@@ -103,9 +81,11 @@ class AuthService extends ChangeNotifier {
     _users[email] = password;
 
     _currentUser = User(
-      uid: email.hashCode.toString(),
+      id: email.hashCode.toString(),
       email: email,
       displayName: email.split('@')[0],
+      createdAt: DateTime.now(),
+      lastLoginAt: DateTime.now(),
     );
 
     _setLoading(false);
@@ -165,9 +145,11 @@ class AuthService extends ChangeNotifier {
   // Initialize with a pre-signed user for testing (optional)
   void initializeWithTestUser() {
     _currentUser = User(
-      uid: 'test123',
+      id: 'test123',
       email: 'test@example.com',
       displayName: 'Test User',
+      createdAt: DateTime.now().subtract(const Duration(days: 30)),
+      lastLoginAt: DateTime.now(),
     );
     notifyListeners();
   }

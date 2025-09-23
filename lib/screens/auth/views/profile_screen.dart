@@ -234,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      _buildInfoRow('User ID', user?.uid ?? 'Unknown'),
+                      _buildInfoRow('User ID', user?.id ?? 'Unknown'),
                       const SizedBox(height: 8),
                       _buildInfoRow('Email', user?.email ?? 'Unknown'),
                       const SizedBox(height: 8),

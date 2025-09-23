@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/data/theme_provider.dart';
 import 'package:expense_tracker/data/data.dart';
 import 'app_view.dart';
 
