@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/data.dart';
+import 'package:expense_tracker/widgets/widgets.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
   const AllTransactionsScreen({super.key});
@@ -115,66 +115,11 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
                   itemCount: _filteredExpenses.length,
                   itemBuilder: (context, index) {
                     final expense = _filteredExpenses[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: Card(
-                        color: Theme.of(context).colorScheme.surface,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: expense.color.withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(
-                              expense.icon,
-                              color: expense.color,
-                              size: 20,
-                            ),
-                          ),
-                          title: Text(
-                            expense.description.isEmpty ? expense.category : expense.description,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          subtitle: Text(
-                            '${expense.category} • ${DateFormat('MMM dd, yyyy').format(expense.date)}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'KSH ${NumberFormat('#,##0.00').format(expense.amount)}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.red,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.delete,
-                                  color: Theme.of(context).colorScheme.error,
-                                  size: 20,
-                                ),
-                                onPressed: () => _deleteExpense(context, expense.id, provider),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    return ExpenseTile(
+                      expense: expense,
+                      showDeleteButton: true,
+                      showCategory: true,
+                      onDelete: () => _deleteExpense(context, expense.id, provider),
                     );
                   },
                 ),

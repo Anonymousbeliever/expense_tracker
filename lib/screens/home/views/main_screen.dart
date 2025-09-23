@@ -1,11 +1,11 @@
 import 'package:expense_tracker/data/data.dart';
+import 'package:expense_tracker/widgets/widgets.dart';
 import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
 import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
 import 'package:expense_tracker/screens/transactions/transactions.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});
@@ -147,162 +147,11 @@ class MainScreen extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 10),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: 220,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: CustomPaint(
-                  painter: CreditCardPainter(),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Current Balance',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.8),
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                'Active',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "KSH ${NumberFormat('#,##0.00').format(5194.00 - totalExpenses)}",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Monthly Budget',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'KSH 5,194.00',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    'Spent',
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "KSH ${NumberFormat('#,##0.00').format(totalExpenses)}",
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Usage',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  '${((totalExpenses / 5194.00) * 100).toStringAsFixed(1)}%',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            LinearProgressIndicator(
-                              value: totalExpenses / 5194.00,
-                              backgroundColor: Colors.white.withOpacity(0.3),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                totalExpenses / 5194.00 > 0.8 
-                                    ? Colors.redAccent 
-                                    : totalExpenses / 5194.00 > 0.6 
-                                        ? Colors.orangeAccent 
-                                        : Colors.greenAccent,
-                              ),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+              CreditCard(
+                currentBalance: 5194.00 - totalExpenses,
+                monthlyBudget: 5194.00,
+                totalSpent: totalExpenses,
+                isActive: true,
               ),
               SizedBox(height: 10),
               Row(
@@ -370,51 +219,9 @@ class MainScreen extends StatelessWidget {
                         itemCount: recentExpenses.length,
                         itemBuilder: (context, int i) {
                           final expense = recentExpenses[i];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: Card(
-                              color: Theme.of(context).colorScheme.surface,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: ListTile(
-                                leading: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: expense.color.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Icon(
-                                    expense.icon,
-                                    color: expense.color,
-                                  ),
-                                ),
-                                title: Text(
-                                  expense.category,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  DateFormat('MMM dd, yyyy').format(expense.date),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                trailing: Text(
-                                  '- KSH ${NumberFormat('#,##0.00').format(expense.amount)}',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ),
+                          return ExpenseTile(
+                            expense: expense,
+                            showCategory: false, // Show only description since this is category-grouped
                           );
                         },
                       ),
@@ -427,42 +234,4 @@ class MainScreen extends StatelessWidget {
       },
     );
   }
-}
-
-class CreditCardPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    
-    // Create gradient background
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    const gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF667eea),
-        Color(0xFF764ba2),
-        Color(0xFF667eea),
-      ],
-      stops: [0.0, 0.5, 1.0],
-    );
-    
-    paint.shader = gradient.createShader(rect);
-    
-    // Draw rounded rectangle
-    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
-    canvas.drawRRect(rrect, paint);
-    
-    // Add subtle overlay patterns
-    paint.shader = null;
-    paint.color = Colors.white.withOpacity(0.1);
-    
-    // Draw circles for decoration
-    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.2), 60, paint);
-    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.7), 40, paint);
-    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.8), 30, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

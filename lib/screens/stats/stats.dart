@@ -1,4 +1,4 @@
-import 'package:expense_tracker/screens/stats/chart.dart';
+import 'package:expense_tracker/widgets/widgets.dart';
 import 'package:expense_tracker/services/file_export_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -182,7 +182,10 @@ class _StatScreenState extends State<StatScreen> {
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: MyChart(timeFilter: _selectedFilter),
+                        child: ExpenseChart(
+                          expenses: provider.expenses,
+                          timeFilter: _selectedFilter,
+                        ),
                       ),
                     ),
                   ),
