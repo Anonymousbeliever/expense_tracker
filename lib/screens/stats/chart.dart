@@ -1,163 +1,170 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
+import 'package:expense_tracker/data/data.dart';
 
 class MyChart extends StatefulWidget {
-  const MyChart({super.key});
+  final String timeFilter; // "7 Days" or "30 Days"
+  const MyChart({super.key, required this.timeFilter});
 
   @override
   State<MyChart> createState() => _MyChartState();
 }
 
 class _MyChartState extends State<MyChart> {
+  int touchedIndex = -1; // For tooltip interaction
+
   @override
   Widget build(BuildContext context) {
+    final provider = Provider.of<ExpensesProvider>(context);
+    final expenses = provider.expenses;
+
+    // Filter expenses based on time range
+    final now = DateTime.now();
+    final days = widget.timeFilter == '7 Days' ? 7 : 30;
+    final startDate = now.subtract(Duration(days: days - 1));
+    final filteredExpenses = expenses
+        .where((e) => e.date.isAfter(startDate.subtract(const Duration(days: 1))))
+        .toList();
+
+    // Aggregate expenses by day
+    final dailyTotals = <DateTime, double>{};
+    for (var expense in filteredExpenses) {
+      final day = DateTime(expense.date.year, expense.date.month, expense.date.day);
+      dailyTotals[day] = (dailyTotals[day] ?? 0) + expense.amount;
+    }
+
+    // Generate bar groups (last `days` days)
+    final barGroups = List.generate(days, (i) {
+      final date = now.subtract(Duration(days: days - 1 - i));
+      final dayKey = DateTime(date.year, date.month, date.day);
+      final total = dailyTotals[dayKey] ?? 0.0;
+      return makeGroupData(i, total, dailyTotals);
+    });
+
+    // Calculate max Y for scaling
+    final maxY = dailyTotals.values.isEmpty ? 5.0 : dailyTotals.values.reduce((a, b) => a > b ? a : b) * 1.2;
+
     return BarChart(
-      mainBarData(),
+      BarChartData(
+        alignment: BarChartAlignment.spaceAround,
+        maxY: maxY < 5 ? 5 : maxY,
+        barTouchData: BarTouchData(
+          enabled: true,
+          touchTooltipData: BarTouchTooltipData(
+            tooltipBgColor: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            getTooltipItem: (group, groupIdx, rod, rodIdx) {
+              final date = now.subtract(Duration(days: days - 1 - group.x));
+              return BarTooltipItem(
+                'KSH ${rod.toY.toStringAsFixed(2)}\n${DateFormat('MMM dd').format(date)}',
+                TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              );
+            },
+          ),
+          touchCallback: (FlTouchEvent event, barTouchResponse) {
+            setState(() {
+              if (!event.isInterestedForInteractions ||
+                  barTouchResponse == null ||
+                  barTouchResponse.spot == null) {
+                touchedIndex = -1;
+                return;
+              }
+              touchedIndex = barTouchResponse.spot!.touchedBarGroupIndex;
+            });
+          },
+        ),
+        titlesData: FlTitlesData(
+          show: true,
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 38,
+              getTitlesWidget: (value, meta) => getTiles(value, meta, days, now),
+            ),
+          ),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 38,
+              interval: maxY / 5,
+              getTitlesWidget: leftTiles,
+            ),
+          ),
+        ),
+        borderData: FlBorderData(show: false),
+        gridData: FlGridData(
+          show: true,
+          drawVerticalLine: false,
+          getDrawingHorizontalLine: (value) => FlLine(
+            color: Theme.of(context).colorScheme.outlineVariant,
+            strokeWidth: 1,
+          ),
+        ),
+        barGroups: barGroups,
+      ),
     );
   }
 
-  BarChartGroupData makeGroupData(int x, double y) {
+  BarChartGroupData makeGroupData(int x, double y, Map<DateTime, double> dailyTotals) {
     return BarChartGroupData(
-      barsSpace: 4,
       x: x,
       barRods: [
         BarChartRodData(
           toY: y,
-          color: Colors.black,
-          width: 10,
+          color: touchedIndex == x
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.primary.withOpacity(0.7),
+          width: 12,
+          borderRadius: BorderRadius.circular(6),
           backDrawRodData: BackgroundBarChartRodData(
             show: true,
-            toY: 5,
-            color: Colors.grey.shade300,
+            toY: dailyTotals.isEmpty ? 5 : dailyTotals.values.reduce((a, b) => a > b ? a : b) * 1.2,
+            color: Theme.of(context).colorScheme.surfaceVariant,
           ),
-          borderRadius: BorderRadius.circular(6)
-        )
-      ]
+        ),
+      ],
     );
   }
 
-  List<BarChartGroupData> showingGroups() => List.generate(8, (i) {
-      switch (i) {
-        case 0:
-          return makeGroupData(0, 2);
-        case 1:
-          return makeGroupData(1, 3);
-        case 2:
-          return makeGroupData(2, 2);
-        case 3:
-          return makeGroupData(3, 4.5);
-        case 4:
-          return makeGroupData(4, 3.8);
-        case 5:
-          return makeGroupData(5, 1.5);
-        case 6:
-          return makeGroupData(6, 4);
-        case 7:
-          return makeGroupData(7, 3.8);
-
-        default:
-          return throw Error();
-      }
-    });
-
-
-
-  BarChartData mainBarData () {
-    return BarChartData(
-      titlesData: FlTitlesData(
-        show: true,
-        rightTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: false)
-        ),
-        topTitles:  AxisTitles(                                                                                                                                                                                                                                                                                                                                                                                                                      
-          sideTitles: SideTitles(showTitles: false)
-        ),
-        bottomTitles:  AxisTitles(
-          sideTitles: SideTitles(
-             showTitles: true,
-             reservedSize: 38,
-             getTitlesWidget: getTiles,
-             )          
-        ),
-        leftTitles:  AxisTitles(
-          sideTitles: SideTitles( 
-            showTitles: true,
-            reservedSize: 38,
-             getTitlesWidget: leftTiles,
-            )          
-        ),
-      ),
-      borderData: FlBorderData(
-        show: false,
-      ),
-      gridData: FlGridData(show: false),
-      barGroups: showingGroups(),
+  Widget getTiles(double value, TitleMeta meta, int days, DateTime now) {
+    final style = TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+      fontSize: 12,
     );
-  }
-  Widget getTiles (double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Colors.grey,
-      fontWeight: FontWeight.bold,
-      fontSize: 14
-    );
-    Widget text;
-    switch (value.toInt()) {
-      case 0:
-        text = const Text('01', style: style);
-        break;
-      case 1:
-        text = const Text('02', style: style);
-        break;
-      case 2:
-        text = const Text('03', style: style);
-        break;
-      case 3:
-        text = const Text('04', style: style);
-        break;
-      case 4:
-        text = const Text('05', style: style);
-        break;
-      case 5:
-        text = const Text('06', style: style);
-        break;
-      case 6:
-        text = const Text('07', style: style);
-        break;
-      case 7:
-        text = const Text('08', style: style);
-      default:
-        text = const Text('', style: style);
-        break;
-    }
+    final date = now.subtract(Duration(days: days - 1 - value.toInt()));
+    final text = DateFormat('MMM dd').format(date);
     return SideTitleWidget(
       axisSide: meta.axisSide,
-      space: 16, 
-      child: text
+      space: 8,
+      child: Text(text, style: style),
     );
   }
- Widget leftTiles (double value, TitleMeta meta) {
-    const style = TextStyle(
-      color: Colors.grey,
-      fontWeight: FontWeight.bold,
-      fontSize: 14
+
+  Widget leftTiles(double value, TitleMeta meta) {
+    final style = TextStyle(
+      color: Theme.of(context).colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w600,
+      fontSize: 12,
     );
     String text;
     if (value == 0) {
-      text = '1K';
-    } else if (value == 2) {
-      text = '2K';
-    } else if (value == 3) {
-      text = '3K';
-    } else if (value == 4) {
-      text = '4K';
-    } else if (value == 5) {
-      text = '5K';
+      text = '0';
+    } else if (value >= 1000) {
+      text = '${(value / 1000).toStringAsFixed(0)}K';
     } else {
-      return Container();
+      text = value.toStringAsFixed(0);
     }
     return SideTitleWidget(
       axisSide: meta.axisSide,
-      space: 0,
+      space: 8,
       child: Text(text, style: style),
     );
   }
