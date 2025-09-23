@@ -16,7 +16,7 @@ class Expense {
     required this.amount,
     required this.category,
     required this.date,
-    required this.description,
+    this.description = '',
     required this.icon,
     required this.color,
   });

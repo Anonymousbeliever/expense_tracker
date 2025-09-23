@@ -13,7 +13,6 @@ class AddExpense extends StatefulWidget {
 class _AddExpenseState extends State<AddExpense> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
-  final _descriptionController = TextEditingController();
   final _dateController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
   String? _selectedCategory;
@@ -47,7 +46,6 @@ class _AddExpenseState extends State<AddExpense> {
         amount: double.parse(_amountController.text),
         category: _selectedCategory!,
         date: _selectedDate,
-        description: _descriptionController.text.trim(),
         icon: selectedCategoryData['icon'],
         color: selectedCategoryData['color'],
       );
@@ -215,33 +213,6 @@ class _AddExpenseState extends State<AddExpense> {
                           ),
                           const SizedBox(height: 16),
                           TextFormField(
-                            controller: _descriptionController,
-                            decoration: InputDecoration(
-                              labelText: 'Description',
-                              hintText: 'e.g., Lunch at Cafe',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              prefixIcon: Container(
-                                margin: const EdgeInsets.only(right: 8),
-                                padding: const EdgeInsets.all(8),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.primaryContainer,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Icon(
-                                  Icons.description,
-                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            maxLines: 2,
-                            validator: (value) =>
-                                (value?.trim().isEmpty ?? true) ? 'Enter a description' : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
                             controller: _dateController,
                             readOnly: true,
                             onTap: () async {
@@ -312,7 +283,6 @@ class _AddExpenseState extends State<AddExpense> {
   @override
   void dispose() {
     _amountController.dispose();
-    _descriptionController.dispose();
     _dateController.dispose();
     super.dispose();
   }
