@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
-import 'package:expense_tracker/screens/auth/views/auth_wrapper.dart';
+import 'package:expense_tracker/screens/auth/auth.dart';
 
 class MyAppView extends StatelessWidget {
   const MyAppView({super.key});

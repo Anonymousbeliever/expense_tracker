@@ -1,7 +1,6 @@
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/widgets/widgets.dart';
-import 'package:expense_tracker/screens/auth/views/profile_screen.dart';
-import 'package:expense_tracker/screens/auth/views/settings_screen.dart';
+import 'package:expense_tracker/screens/auth/auth.dart';
 import 'package:expense_tracker/screens/transactions/transactions.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';

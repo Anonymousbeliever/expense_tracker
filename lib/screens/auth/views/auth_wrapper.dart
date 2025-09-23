@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/models/user.dart';
-import 'package:expense_tracker/screens/home/views/home_screen.dart';
+import 'package:expense_tracker/screens/home/home.dart';
 import 'login_screen.dart';
 
 class AuthWrapper extends StatelessWidget {

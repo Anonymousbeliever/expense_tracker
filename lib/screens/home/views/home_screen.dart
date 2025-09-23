@@ -1,7 +1,7 @@
 import 'dart:math';
-import 'package:expense_tracker/screens/add_expense/views/add_expense.dart';
-import 'package:expense_tracker/screens/home/views/main_screen.dart';
-import 'package:expense_tracker/screens/stats/stats.dart';
+import 'package:expense_tracker/screens/add_expense/add_expense.dart';
+import 'package:expense_tracker/screens/home/home.dart';
+import 'package:expense_tracker/screens/stats/stats_barrel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
