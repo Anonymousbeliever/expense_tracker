@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/data.dart';
-import 'package:expense_tracker/widgets/widgets.dart';
 
 class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
@@ -251,12 +250,22 @@ class _AddExpenseState extends State<AddExpense> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          CustomButton.primary(
-                            text: 'Add Expense',
-                            onPressed: _isLoading ? null : _saveExpense,
-                            isLoading: _isLoading,
-                            isFullWidth: true,
-                            size: ButtonSize.large,
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _saveExpense,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text('Add Expense'),
+                            ),
                           ),
                         ],
                       ),
