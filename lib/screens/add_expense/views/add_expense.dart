@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:expense_tracker/data/data.dart';
 
 class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
@@ -9,182 +11,309 @@ class AddExpense extends StatefulWidget {
 }
 
 class _AddExpenseState extends State<AddExpense> {
-  TextEditingController amountController = TextEditingController();
-  TextEditingController categoryController = TextEditingController();
-  TextEditingController dateController = TextEditingController();
-  DateTime selectedDate = DateTime.now();
+  final _formKey = GlobalKey<FormState>();
+  final _amountController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _dateController = TextEditingController();
+  DateTime _selectedDate = DateTime.now();
+  String? _selectedCategory;
+  bool _isLoading = false;
+
+  final List<Map<String, dynamic>> _categories = [
+    {'name': 'Food', 'icon': Icons.restaurant, 'color': Colors.red},
+    {'name': 'Transport', 'icon': Icons.directions_car, 'color': Colors.blue},
+    {'name': 'Entertainment', 'icon': Icons.movie, 'color': Colors.green},
+    {'name': 'Bills', 'icon': Icons.receipt, 'color': Colors.orange},
+    {'name': 'Shopping', 'icon': Icons.shopping_bag, 'color': Colors.purple},
+    {'name': 'Other', 'icon': Icons.category, 'color': Colors.grey},
+  ];
 
   @override
   void initState() {
-    dateController.text = DateTime.now().toString().split(' ')[0];
     super.initState();
+    _dateController.text = DateFormat('yyyy-MM-dd').format(_selectedDate);
+    _selectedCategory = _categories[0]['name'];
+  }
+
+  Future<void> _saveExpense() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _isLoading = true);
+
+    try {
+      final provider = Provider.of<ExpensesProvider>(context, listen: false);
+      final selectedCategoryData = _categories.firstWhere((cat) => cat['name'] == _selectedCategory);
+      final expense = Expense(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        amount: double.parse(_amountController.text),
+        category: _selectedCategory!,
+        date: _selectedDate,
+        description: _descriptionController.text.trim(),
+        icon: selectedCategoryData['icon'],
+        color: selectedCategoryData['color'],
+      );
+      provider.addExpense(expense);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expense added successfully!'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to add expense: $e'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         appBar: AppBar(
-          backgroundColor: Theme.of(context).colorScheme.background,
+          backgroundColor: Theme.of(context).colorScheme.surface,
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
+          elevation: 0,
+          title: const Text('Add Expense'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Add Expenses",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 16),
-              SizedBox(
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: TextFormField(
-                  controller: amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: Colors.grey.shade300,
-                    prefixIcon: Icon(
-                      CupertinoIcons.money_dollar,
-                      color: Colors.grey.shade500,
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    hintText: "Amount in KSH",
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
-                      borderSide: BorderSide.none,
+                    child: Icon(
+                      Icons.add_circle,
+                      size: 60,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
                 ),
-              ),
-              SizedBox(height: 32),
-              TextFormField(
-                readOnly: true,
-                onTap: () {
-                  // Show category selection modal or dropdown
-                },
-                controller: categoryController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  prefixIcon: Icon(
-                    CupertinoIcons.list_bullet,
-                    color: Colors.grey.shade500,
-                  ),
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (ctx) {
-                          return AlertDialog(
-                            title: Text("Add New Category"),
-                            content: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(height: 16),
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.grey.shade300,
-                                    hintText: "Name",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.grey.shade300,
-                                    hintText: "Icon",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 16),
-                                TextFormField(
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.grey.shade300,
-                                    hintText: "Color",
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    icon: Icon(
-                      CupertinoIcons.plus,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                  hintText: "Category",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 16),
+                Center(
+                  child: Text(
+                    'Add New Expense',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onBackground,
+                        ),
                   ),
                 ),
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: dateController,
-                readOnly: true,
-                onTap: () async {
-                  DateTime? newDate = await showDatePicker(
-                    context: context,
-                    initialDate: selectedDate,
-                    firstDate: DateTime(2000),
-                    lastDate: DateTime(2100),
-                  );
-                  if (newDate != null) {
-                    dateController.text = newDate.toString().split(' ')[0];
-                  }
-                },
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.grey.shade300,
-                  prefixIcon: Icon(
-                    CupertinoIcons.calendar,
-                    color: Colors.grey.shade500,
-                  ),
-                  hintText: "Date",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
+                const SizedBox(height: 8),
+                Center(
+                  child: Text(
+                    'Track your spending with ease',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                const SizedBox(height: 24),
+                Card(
+                  color: Theme.of(context).colorScheme.surface,
+                  elevation: 0,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _amountController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            decoration: InputDecoration(
+                              labelText: 'Amount (KSH)',
+                              hintText: 'e.g., 500.00',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.attach_money,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) return 'Enter an amount';
+                              final amount = double.tryParse(value!);
+                              if (amount == null || amount <= 0) return 'Enter a valid positive amount';
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 16),
+                          DropdownButtonFormField<String>(
+                            value: _selectedCategory,
+                            decoration: InputDecoration(
+                              labelText: 'Category',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.list,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            items: _categories.map((category) {
+                              return DropdownMenuItem<String>(
+                                value: category['name'],
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      category['icon'],
+                                      color: category['color'],
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(category['name']),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                            onChanged: (value) => setState(() => _selectedCategory = value),
+                            validator: (value) => value == null ? 'Select a category' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _descriptionController,
+                            decoration: InputDecoration(
+                              labelText: 'Description',
+                              hintText: 'e.g., Lunch at Cafe',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.description,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            maxLines: 2,
+                            validator: (value) =>
+                                (value?.trim().isEmpty ?? true) ? 'Enter a description' : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _dateController,
+                            readOnly: true,
+                            onTap: () async {
+                              final newDate = await showDatePicker(
+                                context: context,
+                                initialDate: _selectedDate,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime.now(),
+                              );
+                              if (newDate != null) {
+                                setState(() {
+                                  _selectedDate = newDate;
+                                  _dateController.text = DateFormat('yyyy-MM-dd').format(newDate);
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              labelText: 'Date',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              prefixIcon: Container(
+                                margin: const EdgeInsets.only(right: 8),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primaryContainer,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.calendar_today,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isLoading ? null : _saveExpense,
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: Theme.of(context).colorScheme.primary,
+                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text('Add Expense'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                child: Text("Add Expense"),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _amountController.dispose();
+    _descriptionController.dispose();
+    _dateController.dispose();
+    super.dispose();
   }
 }

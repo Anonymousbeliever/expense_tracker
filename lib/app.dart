@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
+import 'package:expense_tracker/data/data.dart';
 import 'app_view.dart';
 
 class MyApp extends StatelessWidget {
@@ -8,8 +9,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        ChangeNotifierProvider(create: (context) => ExpensesProvider()),
+      ],
       child: const MyAppView(),
     );
   }
