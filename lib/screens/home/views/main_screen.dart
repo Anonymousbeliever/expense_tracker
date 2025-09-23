@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/data/auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
@@ -149,143 +148,165 @@ class MainScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               Container(
                 width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.25,
+                height: 220,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).colorScheme.primary,
-                      Theme.of(context).colorScheme.secondary,
-                      Theme.of(context).colorScheme.tertiary,
-                    ],
-                    transform: const GradientRotation(pi / 4),
-                  ),
-                  borderRadius: BorderRadius.circular(25),
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.3),
-                      spreadRadius: 4,
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
+                      color: Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      "Total Balance",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    SizedBox(height: 12),
-                    Text(
-                      "KSH ${NumberFormat('#,##0.00').format(5194.00 - totalExpenses)}",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Container(
-                                width: 25,
-                                height: 25,
-                                decoration: BoxDecoration(
-                                  color: Colors.white30,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    CupertinoIcons.arrow_down,
-                                    size: 12,
-                                    color: Colors.greenAccent,
-                                  ),
+                child: CustomPaint(
+                  painter: CreditCardPainter(),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Current Balance',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.8),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                'Active',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Column(
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "KSH ${NumberFormat('#,##0.00').format(5194.00 - totalExpenses)}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Income",
+                                    'Monthly Budget',
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white,
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    "KSH 3,500.00",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                    'KSH 5,194.00',
+                                    style: const TextStyle(
                                       color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: 25,
-                                height: 25,
-                                decoration: BoxDecoration(
-                                  color: Colors.white30,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Center(
-                                  child: Icon(
-                                    CupertinoIcons.arrow_down,
-                                    size: 12,
-                                    color: Colors.redAccent,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    "Expenses",
+                                    'Spent',
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white,
+                                      color: Colors.white.withOpacity(0.8),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
                                   Text(
                                     "KSH ${NumberFormat('#,##0.00').format(totalExpenses)}",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                    style: const TextStyle(
                                       color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Usage',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                Text(
+                                  '${((totalExpenses / 5194.00) * 100).toStringAsFixed(1)}%',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.8),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            LinearProgressIndicator(
+                              value: totalExpenses / 5194.00,
+                              backgroundColor: Colors.white.withOpacity(0.3),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                totalExpenses / 5194.00 > 0.8 
+                                    ? Colors.redAccent 
+                                    : totalExpenses / 5194.00 > 0.6 
+                                        ? Colors.orangeAccent 
+                                        : Colors.greenAccent,
+                              ),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -408,4 +429,42 @@ class MainScreen extends StatelessWidget {
       },
     );
   }
+}
+
+class CreditCardPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint();
+    
+    // Create gradient background
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    const gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF667eea),
+        Color(0xFF764ba2),
+        Color(0xFF667eea),
+      ],
+      stops: [0.0, 0.5, 1.0],
+    );
+    
+    paint.shader = gradient.createShader(rect);
+    
+    // Draw rounded rectangle
+    final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(24));
+    canvas.drawRRect(rrect, paint);
+    
+    // Add subtle overlay patterns
+    paint.shader = null;
+    paint.color = Colors.white.withOpacity(0.1);
+    
+    // Draw circles for decoration
+    canvas.drawCircle(Offset(size.width * 0.8, size.height * 0.2), 60, paint);
+    canvas.drawCircle(Offset(size.width * 0.9, size.height * 0.7), 40, paint);
+    canvas.drawCircle(Offset(size.width * 0.1, size.height * 0.8), 30, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
