@@ -6,7 +6,7 @@ class HelpSupportScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -27,7 +27,7 @@ class HelpSupportScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.3),
+                  shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
@@ -37,31 +37,31 @@ class HelpSupportScreen extends StatelessWidget {
                           'Frequently Asked Questions',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onBackground,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                         const SizedBox(height: 16),
-                        _buildFAQItem(
+                        _buildFAQDropdown(
                           context,
                           'How do I add an expense?',
                           'Go to the "Add Expense" screen, enter the amount, category, and date, then tap "Add Expense".',
                         ),
-                        _buildFAQItem(
+                        _buildFAQDropdown(
                           context,
                           'How do I recharge my balance?',
                           'Tap the "Recharge & Budget" button on the main screen, enter the amount, and confirm to add it to your balance.',
                         ),
-                        _buildFAQItem(
+                        _buildFAQDropdown(
                           context,
                           'What is the monthly budget?',
                           'The monthly budget is a limit you can set to track your spending, adjustable via the recharge dialog.',
                         ),
-                        _buildFAQItem(
+                        _buildFAQDropdown(
                           context,
                           'How do I view all transactions?',
                           'Tap "View All" on the main screen or navigate to the transactions section to see your complete expense history.',
                         ),
-                        _buildFAQItem(
+                        _buildFAQDropdown(
                           context,
                           'How do I change categories?',
                           'When adding an expense, tap the category dropdown to select from available categories like Food, Travel, Entertainment, etc.',
@@ -77,7 +77,7 @@ class HelpSupportScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.3),
+                  shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
@@ -87,14 +87,14 @@ class HelpSupportScreen extends StatelessWidget {
                           'Contact Support',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onBackground,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                         const SizedBox(height: 16),
                         ListTile(
                           leading: Icon(Icons.email, color: Theme.of(context).colorScheme.primary),
                           title: Text(
-                            'support@expensetracker.com',
+                            'jkcharo18@gmail.com',
                             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                                   color: Theme.of(context).colorScheme.onSurface,
                                 ),
@@ -139,7 +139,7 @@ class HelpSupportScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.3),
+                  shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.3),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Column(
@@ -149,7 +149,7 @@ class HelpSupportScreen extends StatelessWidget {
                           'App Information',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onBackground,
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                         ),
                         const SizedBox(height: 16),
@@ -197,26 +197,33 @@ class HelpSupportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFAQItem(BuildContext context, String question, String answer) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
+  Widget _buildFAQDropdown(BuildContext context, String question, String answer) {
+    return Theme(
+      data: Theme.of(context).copyWith(
+        dividerColor: Colors.transparent,
+      ),
+      child: ExpansionTile(
+        title: Text(
           question,
           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          answer,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        ),
-        const SizedBox(height: 12),
-      ],
+        collapsedIconColor: Theme.of(context).colorScheme.onSurface,
+        iconColor: Theme.of(context).colorScheme.onSurface,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Text(
+              answer,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
