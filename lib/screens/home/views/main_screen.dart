@@ -74,7 +74,7 @@ class MainScreen extends StatelessWidget {
                   PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'logout') {
-                        await AuthService().signOut();
+                        await authService.signOut();
                       } else if (value == 'theme') {
                         final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
                         themeProvider.setDarkTheme(!themeProvider.getIsDarkTheme);

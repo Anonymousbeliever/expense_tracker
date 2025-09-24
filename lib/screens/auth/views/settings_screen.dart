@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/data/auth_service.dart';
+import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
 import 'forgot_password_screen.dart';
 
@@ -10,7 +10,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
+    final authService = Provider.of<FirebaseAuthService>(context, listen: false);
 
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.background,
@@ -223,7 +223,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context, AuthService authService) {
+  void _showLogoutDialog(BuildContext context, FirebaseAuthService authService) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

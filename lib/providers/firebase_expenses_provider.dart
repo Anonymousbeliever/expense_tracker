@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../models/expense.dart';
 import '../repositories/repositories.dart';
@@ -11,6 +12,7 @@ class FirebaseExpensesProvider with ChangeNotifier {
   List<Expense> _expenses = [];
   bool _isLoading = false;
   String? _error;
+  StreamSubscription<List<Expense>>? _expensesSubscription;
 
   /// Constructor
   FirebaseExpensesProvider(this._authService) {
@@ -49,8 +51,12 @@ class FirebaseExpensesProvider with ChangeNotifier {
       _startListeningToExpenses();
       loadExpenses();
     } else {
+      // Cancel existing subscription and clear data on logout
+      _expensesSubscription?.cancel();
+      _expensesSubscription = null;
       _repository = null;
       _expenses.clear();
+      _clearError();
       notifyListeners();
     }
   }
@@ -207,7 +213,10 @@ class FirebaseExpensesProvider with ChangeNotifier {
   void _startListeningToExpenses() {
     if (_repository == null) return;
 
-    _repository!.getExpensesStream().listen(
+    // Cancel existing subscription before creating new one
+    _expensesSubscription?.cancel();
+    
+    _expensesSubscription = _repository!.getExpensesStream().listen(
       (expenses) {
         _expenses = expenses;
         notifyListeners();
@@ -278,6 +287,7 @@ class FirebaseExpensesProvider with ChangeNotifier {
   @override
   void dispose() {
     _authService.removeListener(_onAuthStateChanged);
+    _expensesSubscription?.cancel();
     super.dispose();
   }
 }
