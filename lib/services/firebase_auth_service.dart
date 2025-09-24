@@ -184,6 +184,21 @@ class FirebaseAuthService extends ChangeNotifier {
     }
   }
 
+  // Update user email
+  Future<void> updateEmail(String newEmail) async {
+    _setLoading(true);
+    
+    try {
+      await _auth.currentUser?.verifyBeforeUpdateEmail(newEmail);
+      await _auth.currentUser?.reload();
+      _setLoading(false);
+      notifyListeners();
+    } catch (e) {
+      _setLoading(false);
+      throw Exception('Email update failed: $e');
+    }
+  }
+
   // Get user-friendly error messages
   String _getErrorMessage(String errorCode) {
     switch (errorCode) {
