@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
+import 'package:expense_tracker/providers/budget_provider.dart';
 
 class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
@@ -40,23 +41,51 @@ class _AddExpenseState extends State<AddExpense> {
     setState(() => _isLoading = true);
 
     try {
-      final provider = Provider.of<FirebaseExpensesProvider>(context, listen: false);
+      final expenseProvider = Provider.of<FirebaseExpensesProvider>(context, listen: false);
+      final budgetProvider = Provider.of<BudgetProvider>(context, listen: false);
       final selectedCategoryData = _categories.firstWhere((cat) => cat['name'] == _selectedCategory);
+      final expenseAmount = double.parse(_amountController.text);
+      
+      // Check if user has sufficient balance
+      if (budgetProvider.currentBalance < expenseAmount) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Insufficient balance! Please recharge your account.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+      
       final expense = Expense(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        amount: double.parse(_amountController.text),
+        amount: expenseAmount,
         category: _selectedCategory!,
         date: _selectedDate,
         icon: selectedCategoryData['icon'],
         color: selectedCategoryData['color'],
       );
-      provider.addExpense(expense);
+      
+      // Add expense to Firebase first
+      await expenseProvider.addExpense(expense);
+      
+      // Then deduct from balance
+      await budgetProvider.deductBalance(expenseAmount);
 
       if (mounted) {
+        // Check if over budget and show appropriate message
+        final totalSpent = expenseProvider.totalExpenses;
+        final isOverBudget = budgetProvider.isOverBudget(totalSpent);
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Expense added successfully!'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: Text(isOverBudget 
+              ? 'Expense added! Warning: You are over budget this month.'
+              : 'Expense added successfully!'),
+            backgroundColor: isOverBudget ? Colors.orange : Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );

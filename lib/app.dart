@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
+import 'package:expense_tracker/providers/budget_provider.dart';
 import 'app_view.dart';
 
 class MyApp extends StatelessWidget {
@@ -14,6 +15,9 @@ class MyApp extends StatelessWidget {
       providers: [
         // Theme Provider
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
+        
+        // Budget Provider
+        ChangeNotifierProvider(create: (context) => BudgetProvider()),
         
         // Firebase Auth Service
         ChangeNotifierProvider(
