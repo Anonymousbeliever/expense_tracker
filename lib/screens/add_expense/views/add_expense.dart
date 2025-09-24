@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:expense_tracker/data/data.dart';
+import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
 
 class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
@@ -39,7 +40,7 @@ class _AddExpenseState extends State<AddExpense> {
     setState(() => _isLoading = true);
 
     try {
-      final provider = Provider.of<ExpensesProvider>(context, listen: false);
+      final provider = Provider.of<FirebaseExpensesProvider>(context, listen: false);
       final selectedCategoryData = _categories.firstWhere((cat) => cat['name'] == _selectedCategory);
       final expense = Expense(
         id: DateTime.now().millisecondsSinceEpoch.toString(),

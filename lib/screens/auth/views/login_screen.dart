@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/data/auth_service.dart';
+import 'package:expense_tracker/services/firebase_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     
-    final authService = Provider.of<AuthService>(context, listen: false);
+    final authService = Provider.of<FirebaseAuthService>(context, listen: false);
 
     try {
       if (_isLogin) {
@@ -32,13 +33,16 @@ class _LoginScreenState extends State<LoginScreen> {
         await authService.createUserWithEmailAndPassword(
           email: _emailController.text.trim(),
           password: _passwordController.text,
+          displayName: _displayNameController.text.trim().isNotEmpty 
+              ? _displayNameController.text.trim() 
+              : null,
         );
       }
-    } on AuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(e.message),
+            content: Text(e.message ?? 'Authentication failed'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -59,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthService>(
+    return Consumer<FirebaseAuthService>(
       builder: (context, authService, child) {
         return Scaffold(
           backgroundColor: Theme.of(context).colorScheme.background,

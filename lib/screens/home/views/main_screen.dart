@@ -2,6 +2,8 @@ import 'package:expense_tracker/data/data.dart';
 import 'package:expense_tracker/widgets/widgets.dart';
 import 'package:expense_tracker/screens/auth/auth.dart';
 import 'package:expense_tracker/screens/transactions/transactions.dart';
+import 'package:expense_tracker/services/firebase_auth_service.dart';
+import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,10 +13,10 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authService = AuthService();
+    final authService = Provider.of<FirebaseAuthService>(context);
     final currentUser = authService.currentUser;
 
-    return Consumer<ExpensesProvider>(
+    return Consumer<FirebaseExpensesProvider>(
       builder: (context, expensesProvider, child) {
         final totalExpenses = expensesProvider.totalExpenses;
         final recentExpenses = expensesProvider.expenses.take(5).toList();

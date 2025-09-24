@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/data/auth_service.dart';
+import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/models/user.dart';
 import 'package:expense_tracker/screens/home/home.dart';
 import 'login_screen.dart';
@@ -10,7 +10,7 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthService>(
+    return Consumer<FirebaseAuthService>(
       builder: (context, authService, child) {
         return StreamBuilder<User?>(
           stream: authService.authStateChanges,
@@ -46,7 +46,7 @@ class AuthWrapper extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Loading...',
+                        'Initializing...',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],

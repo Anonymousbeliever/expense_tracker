@@ -1,8 +1,8 @@
 import 'package:expense_tracker/widgets/widgets.dart';
 import 'package:expense_tracker/services/services.dart';
+import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:expense_tracker/data/data.dart';
 
 class StatScreen extends StatefulWidget {
   const StatScreen({super.key});
@@ -14,7 +14,7 @@ class StatScreen extends StatefulWidget {
 class _StatScreenState extends State<StatScreen> {
   String _selectedFilter = '7 Days';
 
-  Future<void> _downloadReport(ExpensesProvider provider) async {
+  Future<void> _downloadReport(FirebaseExpensesProvider provider) async {
     final now = DateTime.now();
     final days = _selectedFilter == '7 Days' ? 7 : 30;
     final startDate = now.subtract(Duration(days: days - 1));
@@ -39,7 +39,7 @@ class _StatScreenState extends State<StatScreen> {
         foregroundColor: Theme.of(context).colorScheme.onSurface,
         elevation: 0,
         actions: [
-          Consumer<ExpensesProvider>(
+          Consumer<FirebaseExpensesProvider>(
             builder: (context, provider, child) {
               return IconButton(
                 icon: const Icon(Icons.download),
@@ -53,7 +53,7 @@ class _StatScreenState extends State<StatScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Consumer<ExpensesProvider>(
+          child: Consumer<FirebaseExpensesProvider>(
             builder: (context, provider, child) {
               final expenses = provider.expenses;
               if (expenses.isEmpty) {

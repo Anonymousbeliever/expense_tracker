@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/data/data.dart';
+import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
 import 'package:expense_tracker/widgets/widgets.dart';
 
 class AllTransactionsScreen extends StatefulWidget {
@@ -45,7 +46,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
           ),
         ],
       ),
-      body: Consumer<ExpensesProvider>(
+      body: Consumer<FirebaseExpensesProvider>(
         builder: (context, provider, child) {
           final expenses = provider.expenses;
           _filteredExpenses = expenses.where((expense) =>
@@ -131,7 +132,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
     );
   }
 
-  Future<void> _deleteExpense(BuildContext context, String id, ExpensesProvider provider) async {
+  Future<void> _deleteExpense(BuildContext context, String id, FirebaseExpensesProvider provider) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -157,7 +158,7 @@ class _AllTransactionsScreenState extends State<AllTransactionsScreen> {
     );
 
     if (confirmed == true) {
-      provider.removeExpense(id);
+      provider.deleteExpense(id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
