@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
+import 'package:expense_tracker/screens/help_support/help_support.dart';
 import 'forgot_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -138,6 +139,31 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   title: const Text('App Version'),
                   subtitle: const Text('1.0.0'),
+                ),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.tertiaryContainer,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      CupertinoIcons.question_circle,
+                      color: Theme.of(context).colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                  title: const Text('Help & Support'),
+                  subtitle: const Text('Get help and contact support'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
+                    );
+                  },
                 ),
                 Divider(
                   height: 1,
