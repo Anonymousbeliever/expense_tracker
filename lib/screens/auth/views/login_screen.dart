@@ -17,6 +17,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _displayNameController = TextEditingController();
   bool _isLogin = true;
+  bool _isPasswordVisible = false;
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -172,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Expanded(
                                       child: TextFormField(
                                         controller: _passwordController,
-                                        obscureText: true,
+                                        obscureText: !_isPasswordVisible,
                                         style: TextStyle(
                                           color: Theme.of(context).colorScheme.onSurface,
                                         ),
@@ -187,6 +188,26 @@ class _LoginScreenState extends State<LoginScreen> {
                                         validator: (value) =>
                                             (value?.length ?? 0) < 6 ? 'Password must be 6+ characters' : null,
                                       ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(
+                                        _isPasswordVisible
+                                            ? Icons.visibility_off_outlined
+                                            : Icons.visibility_outlined,
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          _isPasswordVisible = !_isPasswordVisible;
+                                        });
+                                      },
+                                      padding: EdgeInsets.zero,
+                                      constraints: const BoxConstraints(
+                                        minWidth: 24,
+                                        minHeight: 24,
+                                      ),
+                                      tooltip: _isPasswordVisible ? 'Hide password' : 'Show password',
                                     ),
                                   ],
                                 ),

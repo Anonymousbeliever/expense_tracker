@@ -234,47 +234,47 @@ class SettingsScreen extends StatelessWidget {
           
           const SizedBox(height: 32),
           
-          // Demo Notice
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.tertiaryContainer,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      CupertinoIcons.info_circle,
-                      color: Theme.of(context).colorScheme.onTertiaryContainer,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Demo Mode',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onTertiaryContainer,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'This app is running in demo mode with simulated authentication. All data is stored locally and will be reset when the app is restarted.',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onTertiaryContainer,
-                    fontSize: 12,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          // // Demo Notice
+          // Container(
+          //   padding: const EdgeInsets.all(16),
+          //   decoration: BoxDecoration(
+          //     color: Theme.of(context).colorScheme.tertiaryContainer,
+          //     borderRadius: BorderRadius.circular(12),
+          //     border: Border.all(
+          //       color: Theme.of(context).colorScheme.tertiary.withOpacity(0.3),
+          //     ),
+          //   ),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Row(
+          //         children: [
+          //           Icon(
+          //             CupertinoIcons.info_circle,
+          //             color: Theme.of(context).colorScheme.onTertiaryContainer,
+          //             size: 20,
+          //           ),
+          //           const SizedBox(width: 8),
+          //           Text(
+          //             'Demo Mode',
+          //             style: TextStyle(
+          //               fontWeight: FontWeight.bold,
+          //               color: Theme.of(context).colorScheme.onTertiaryContainer,
+          //             ),
+          //           ),
+          //         ],
+          //       ),
+          //       const SizedBox(height: 8),
+          //       Text(
+          //         'This app is running in demo mode with simulated authentication. All data is stored locally and will be reset when the app is restarted.',
+          //         style: TextStyle(
+          //           color: Theme.of(context).colorScheme.onTertiaryContainer,
+          //           fontSize: 12,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );
