@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:expense_tracker/services/mpesa_service.dart';
+import 'package:expense_tracker/services/firebase_auth_service.dart';
+import 'package:expense_tracker/config/app_config.dart';
+import 'dart:async';
 
 class InAppPurchaseScreen extends StatefulWidget {
   const InAppPurchaseScreen({super.key});
@@ -11,15 +16,20 @@ class _InAppPurchaseScreenState extends State<InAppPurchaseScreen> {
   int _currentStep = 0;
   final _phoneController = TextEditingController();
   final _amountController = TextEditingController();
+  
+  String? _transactionId;
+  Timer? _statusCheckTimer;
+  bool _isProcessing = false;
+  String _statusMessage = '';
 
   void _goToPaymentForm() {
     setState(() {
       _currentStep = 1;
-      _amountController.text = '5.00'; // Pre-fill premium plan amount
+      _amountController.text = AppConfig.premiumPlanAmount; // Use configured amount
     });
   }
 
-  void _submitPayment() {
+  Future<void> _submitPayment() async {
     if (_phoneController.text.isEmpty || _amountController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -30,45 +40,355 @@ class _InAppPurchaseScreenState extends State<InAppPurchaseScreen> {
       return;
     }
     
-    // Mock payment processing delay
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Processing payment...',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            ],
+    setState(() {
+      _isProcessing = true;
+      _statusMessage = AppConfig.isDevelopment 
+        ? 'Connecting to M-Pesa... (Demo Mode)' 
+        : 'Initiating payment...';
+    });
+
+    try {
+      // Initialize M-Pesa service
+      MpesaService.initialize();
+      
+      final authService = Provider.of<FirebaseAuthService>(context, listen: false);
+      final userId = authService.currentUser?.id;
+      
+      if (userId == null) {
+        throw Exception('User not authenticated');
+      }
+
+      if (AppConfig.enableDebugLogs) {
+        print('Initiating STK Push - Phone: ${_phoneController.text.trim()}, Amount: ${_amountController.text.trim()}, User: $userId');
+      }
+
+      // Initiate STK Push
+      final response = await MpesaService.initiateSTKPush(
+        phoneNumber: _phoneController.text.trim(),
+        amount: _amountController.text.trim(),
+        userId: userId,
+      );
+
+      if (response.success && response.transactionId != null) {
+        _transactionId = response.transactionId!;
+        
+        setState(() {
+          _statusMessage = 'Payment request sent successfully!';
+        });
+
+        if (AppConfig.enableDebugLogs) {
+          print('STK Push successful - Transaction ID: $_transactionId');
+        }
+
+        // Show demo M-Pesa prompt for presentation
+        if (AppConfig.isDevelopment) {
+          await _showDemoMpesaPrompt();
+        } else {
+          // Start polling for transaction status in production mode
+          _startStatusPolling();
+        }
+        
+      } else {
+        throw Exception(response.errorMessage ?? 'Failed to initiate payment');
+      }
+      
+    } catch (e) {
+      setState(() {
+        _isProcessing = false;
+        _statusMessage = '';
+      });
+      
+      if (AppConfig.enableDebugLogs) {
+        print('Payment error: ${e.toString()}');
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Payment failed: ${e.toString()}'),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
-      },
-    );
+      }
+    }
+  }
 
-    // Simulate payment processing
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        Navigator.of(context).pop(); // Close loading dialog
-        setState(() {
-          _currentStep = 2;
-        });
+  void _startStatusPolling() {
+    if (_transactionId == null) return;
+    
+    _statusCheckTimer = Timer.periodic(const Duration(seconds: 3), (timer) async {
+      try {
+        final status = await MpesaService.checkTransactionStatus(_transactionId!);
+        
+        if (status.isCompleted) {
+          _stopStatusPolling();
+          
+          if (status.isSuccessful) {
+            setState(() {
+              _isProcessing = false;
+              _currentStep = 2; // Success page
+            });
+            
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: const Text('Payment successful! You are now a Premium user.'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            }
+          } else {
+            setState(() {
+              _isProcessing = false;
+              _statusMessage = 'Payment failed: ${status.resultDescription ?? "Unknown error"}';
+            });
+          }
+        } else if (status.isFailed) {
+          _stopStatusPolling();
+          
+          setState(() {
+            _isProcessing = false;
+            _statusMessage = 'Payment cancelled or failed: ${status.resultDescription ?? "Unknown error"}';
+          });
+        } else {
+          // Still pending
+          setState(() {
+            _statusMessage = 'Waiting for payment confirmation...';
+          });
+        }
+        
+      } catch (e) {
+        // Continue polling on error, but limit attempts
+        if (timer.tick > 40) { // Stop after ~2 minutes (40 * 3 seconds)
+          _stopStatusPolling();
+          setState(() {
+            _isProcessing = false;
+            _statusMessage = 'Payment status check timed out. Please contact support if payment was deducted.';
+          });
+        }
       }
     });
   }
 
+  Future<void> _showDemoMpesaPrompt() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // M-Pesa Logo/Header
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.phone_android,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'M-PESA',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Message content
+                const Text(
+                  'DEMO: STK Push Request',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  'Pay KES ${_amountController.text}',
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'to Expense Tracker Premium',
+                  style: TextStyle(fontSize: 14),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                // Demo PIN input
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      const Text(
+                        'Enter M-Pesa PIN:',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(4, (index) => 
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 5),
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.grey),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: const Center(
+                              child: Text('*', style: TextStyle(fontSize: 20)),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                // Action buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _statusMessage = 'Payment cancelled by user';
+                          _isProcessing = false;
+                        });
+                        _stopStatusPolling();
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                      ),
+                      child: const Text('CANCEL'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          _statusMessage = 'Processing payment... Please wait.';
+                        });
+                        
+                        // In demo mode, simulate successful payment after a short delay
+                        if (AppConfig.isDevelopment) {
+                          _simulateSuccessfulPayment();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                // Auto complete button for demo
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    setState(() {
+                      _statusMessage = 'Auto-completing payment for demo...';
+                    });
+                    _simulateSuccessfulPayment();
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.blue,
+                  ),
+                  child: const Text('Auto Complete (Demo)', style: TextStyle(fontSize: 12)),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  '(Demo Mode - No real money will be charged)',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _simulateSuccessfulPayment() {
+    // Stop any existing polling
+    _stopStatusPolling();
+    
+    // Simulate processing time
+    Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+          _currentStep = 2; // Move to success page
+        });
+        
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Payment successful! You are now a Premium user.'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        
+        if (AppConfig.enableDebugLogs) {
+          print('Demo: Payment completed successfully');
+        }
+      }
+    });
+  }
+  
+  void _stopStatusPolling() {
+    _statusCheckTimer?.cancel();
+    _statusCheckTimer = null;
+  }
+
   void _reset() {
+    _stopStatusPolling();
     setState(() {
       _currentStep = 0;
       _phoneController.clear();
       _amountController.clear();
+      _isProcessing = false;
+      _statusMessage = '';
+      _transactionId = null;
     });
   }
 
@@ -76,6 +396,7 @@ class _InAppPurchaseScreenState extends State<InAppPurchaseScreen> {
   void dispose() {
     _phoneController.dispose();
     _amountController.dispose();
+    _stopStatusPolling();
     super.dispose();
   }
 
@@ -391,9 +712,18 @@ class _InAppPurchaseScreenState extends State<InAppPurchaseScreen> {
                                 label: const Text('Back'),
                               ),
                               ElevatedButton.icon(
-                                onPressed: _submitPayment,
-                                icon: const Icon(Icons.lock),
-                                label: const Text('Pay Securely'),
+                                onPressed: _isProcessing ? null : _submitPayment,
+                                icon: _isProcessing 
+                                  ? SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(Icons.lock),
+                                label: Text(_isProcessing ? 'Processing...' : 'Pay Securely'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Theme.of(context).colorScheme.primary,
                                   foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -405,6 +735,50 @@ class _InAppPurchaseScreenState extends State<InAppPurchaseScreen> {
                               ),
                             ],
                           ),
+                          
+                          // Status message display
+                          if (_statusMessage.isNotEmpty) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _isProcessing 
+                                  ? Theme.of(context).colorScheme.primaryContainer
+                                  : Theme.of(context).colorScheme.errorContainer,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                children: [
+                                  if (_isProcessing)
+                                    SizedBox(
+                                      width: 16,
+                                      height: 16,
+                                      child: CircularProgressIndicator(
+                                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  else
+                                    Icon(
+                                      Icons.info_outline,
+                                      size: 16,
+                                      color: Theme.of(context).colorScheme.onErrorContainer,
+                                    ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      _statusMessage,
+                                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: _isProcessing
+                                          ? Theme.of(context).colorScheme.onPrimaryContainer
+                                          : Theme.of(context).colorScheme.onErrorContainer,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
