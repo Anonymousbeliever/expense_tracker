@@ -3,6 +3,7 @@ import 'package:expense_tracker/widgets/widgets.dart';
 import 'package:expense_tracker/screens/auth/auth.dart';
 import 'package:expense_tracker/screens/transactions/transactions.dart';
 import 'package:expense_tracker/screens/help_support/help_support.dart';
+import 'package:expense_tracker/screens/in_app_purchase/in_app_purchase.dart';
 import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/providers/firebase_expenses_provider.dart';
 import 'package:expense_tracker/providers/budget_provider.dart';
@@ -102,6 +103,11 @@ class MainScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(builder: (_) => const HelpSupportScreen()),
                             );
+                          } else if (value == 'premium') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const InAppPurchaseScreen()),
+                            );
                           }
                         },
                         icon: Icon(CupertinoIcons.settings),
@@ -154,6 +160,16 @@ class MainScreen extends StatelessWidget {
                                 Icon(CupertinoIcons.question_circle, size: 16),
                                 SizedBox(width: 8),
                                 Text('Help & Support'),
+                              ],
+                            ),
+                          ),
+                          PopupMenuItem<String>(
+                            value: 'premium',
+                            child: Row(
+                              children: [
+                                Icon(CupertinoIcons.star_circle, size: 16),
+                                SizedBox(width: 8),
+                                Text('Upgrade to Premium'),
                               ],
                             ),
                           ),

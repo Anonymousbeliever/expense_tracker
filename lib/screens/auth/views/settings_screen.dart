@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:expense_tracker/services/firebase_auth_service.dart';
 import 'package:expense_tracker/data/theme_provider.dart';
 import 'package:expense_tracker/screens/help_support/help_support.dart';
+import 'package:expense_tracker/screens/in_app_purchase/in_app_purchase.dart';
 import 'forgot_password_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -54,6 +55,49 @@ class SettingsScreen extends StatelessWidget {
                       themeProvider.setDarkTheme(value);
                     },
                   ),
+                );
+              },
+            ),
+          ),
+          
+          const SizedBox(height: 24),
+          
+          // Premium Section
+          _buildSectionHeader(context, 'Premium'),
+          Card(
+            color: Theme.of(context).colorScheme.surface,
+            child: ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  CupertinoIcons.star_circle,
+                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                ),
+              ),
+              title: const Text('Upgrade to Premium'),
+              subtitle: const Text('Unlock advanced features and analytics'),
+              trailing: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'KSH 5/month',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const InAppPurchaseScreen()),
                 );
               },
             ),
